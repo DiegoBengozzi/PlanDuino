@@ -19,7 +19,7 @@
   const int b3 = A1; //botão decramentar
   
   const int pistao = A2; //'botao' q determina se a plantadeira esta erguida ou abaixada
-  byte estadoPistao;
+  byte estadoPistao;//variavel informa se a plantadeira esta esguida ou abaixada
   
   byte telaInicio = 9;      //VARIAVEIS                                              
   long contador = 0;
@@ -30,20 +30,14 @@
   int test1;
   int test2;
   int test3;
-  int test4;
-
-  
+  int test4;  
   byte numeroLinha = EEPROM.read(0);
   byte espacamento = EEPROM.read(1);
-  byte furoDisco = EEPROM.read(2);
+  byte furoDisco = EEPROM.read(2);  
+  //int notas[] = { 524, 588, 660, 699, 785, 881, 989 }; // possivelmente usadas no sistema de alerta de erros e falhas
   
-  //int notas[] = { 524, 588, 660, 699, 785, 881, 989 };
-  
-  
-  void setup(){
-    
-         //INICIALIZACAO DA PORTA
-    pinMode(alerta, OUTPUT);
+  void setup(){            
+    pinMode(alerta, OUTPUT);    //INICIALIZACAO DA PORTA
     pinMode(chds, INPUT);
     pinMode(chdi, INPUT);
     pinMode(ches, INPUT);
@@ -51,36 +45,32 @@
     pinMode(botao, INPUT);
     pinMode(b2, INPUT);
     pinMode(b3, INPUT);
-    pinMode(pistao, INPUT);
-    Serial.begin(9600);
+    pinMode(pistao, INPUT);    
     Wire.begin();
     RTC.begin();
     lcd.begin(16, 2);
-    ajusteRTC();
-    telaApresentacao();
-    
+    ajusteRTC();    
+    telaApresentacao();    
   }
   
   void loop(){ 
     
-    unsigned long tempoFinal = millis() + 500;
+    unsigned long tempoFinal = millis() + 1000;
     
-    byte estadoAnteriorBotao = digitalRead(botao);
-    byte estadoAnteriorB2 = digitalRead(b2);
-    byte estadoAnteriorB3 = digitalRead(b3);
-    
-    estadoPistao = digitalRead(pistao);
-    
-    byte estadoAnteriorChds = digitalRead(chds);
-    byte estadoAnteriorChdi = digitalRead(chdi);
-    byte estadoAnteriorChes = digitalRead(ches);
-    byte estadoAnteriorChei = digitalRead(chei);
-      
     contador = 0;
     test1 = 0;
     test2 = 0;
     test3 = 0;
     test4 = 0;
+    
+    byte estadoAnteriorChds = digitalRead(chds);
+    byte estadoAnteriorChdi = digitalRead(chdi);
+    byte estadoAnteriorChes = digitalRead(ches);
+    byte estadoAnteriorChei = digitalRead(chei);
+    byte estadoAnteriorBotao = digitalRead(botao);
+    byte estadoAnteriorB2 = digitalRead(b2);
+    byte estadoAnteriorB3 = digitalRead(b3);  
+    estadoPistao = digitalRead(pistao);
     
     while(tempoFinal > millis()){
       
@@ -90,40 +80,32 @@
       byte estadoAtualChei = digitalRead(chei);
       
       byte estadoAtualBotao = digitalRead(botao);
-       byte estadoAtualB2 = digitalRead(b2);
-        byte estadoAtualB3 = digitalRead(b3);
+      byte estadoAtualB2 = digitalRead(b2);
+      byte estadoAtualB3 = digitalRead(b3);
       
   
       if(estadoAtualChds != estadoAnteriorChds){ // teste de pulsos da chave optica
         test1++;
-        contador++;
-        distanciaTotal++;
         estadoAnteriorChds = estadoAtualChds;
       }
      
-      if(estadoAtualChdi != estadoAnteriorChdi){ // teste de pulsos da chave optica   
+      if(estadoAtualChdi != estadoAnteriorChdi){ 
         test2++;
-        contador++;
-        distanciaTotal++;
         estadoAnteriorChdi = estadoAtualChdi;
       } 
   
-      if(estadoAtualChes != estadoAnteriorChes){ // teste de pulsos da chave optica
+      if(estadoAtualChes != estadoAnteriorChes){ 
         test3++;
-        contador++;
-        distanciaTotal++;
         estadoAnteriorChes = estadoAtualChes;
       }
       
-      if(estadoAtualChei != estadoAnteriorChei){ // teste de pulsos da chave optica    
+      if(estadoAtualChei != estadoAnteriorChei){ 
         test4++;
-        contador++;
-        distanciaTotal++;
         estadoAnteriorChei = estadoAtualChei;
-      }
-  
-         
-      if(estadoAtualBotao != estadoAnteriorBotao && estadoAtualBotao == HIGH ){// teste o botao q passa as telas do sistema
+      } 
+      
+      //Botao central - confirmacao/altera tela de configuracao/paraliza alarmes
+      if(estadoAtualBotao != estadoAnteriorBotao && estadoAtualBotao == HIGH ){
         switch(telaInicio){
            case 0:
              telaInicio = 4;
@@ -151,14 +133,27 @@
            case 8:
              break;
            case 9:
-            digitalWrite(alerta, LOW);
-             break;
-             
+             digitalWrite(alerta, LOW);
+             break;            
+           case 10:       
+             break; 
+           case 11:
+             telaInicio = 1;       
+             break; 
+           case 12:
+             telaInicio = 1;       
+             break;             
+           case 13:
+             telaInicio = 1;       
+             break;             
+           case 14:
+             telaInicio = 1;
+             break;            
         }
         estadoAnteriorBotao = estadoAtualBotao;
       } 
       
-      //botao adicionar
+      //Botao adicionar/acresentar/lado direito/avancar tela
        if(estadoAtualB2 != estadoAnteriorB2 && estadoAtualB2 == HIGH ){
          switch(telaInicio){
            case 0:
@@ -185,9 +180,6 @@
              furoDisco = furoDisco + 5;
              break;
            case 8:
-             //numeroLinha = 5;
-             //espacamento = 75;
-             //furoDisco = 28;
              EEPROM.write(0, numeroLinha);
              EEPROM.write(1, espacamento);
              EEPROM.write(2, furoDisco);
@@ -196,11 +188,21 @@
            case 9:
              telaInicio = 0;
              break;
+           case 10:       
+             break; 
+           case 11:       
+             break; 
+           case 12:       
+             break;             
+           case 13:       
+             break;             
+           case 14:       
+             break;             
          }
         estadoAnteriorB2 = estadoAtualB2;
       }
       
-      //botao decrementar
+      //Botao decrementar/lado esquerdo/voltar tela
       if(estadoAtualB3 != estadoAnteriorB3 && estadoAtualB3 == HIGH ){
         switch(telaInicio){
            case 0:
@@ -234,66 +236,73 @@
              telaInicio = 9;
              break;
            case 9:
-             break;           
+             break;
+           case 10:       
+             break; 
+           case 11:       
+             break; 
+           case 12:       
+             break;             
+           case 13:       
+             break;             
+           case 14:       
+             break;             
         }
         estadoAnteriorB3 = estadoAtualB3;
       } 
     }//fim while
-                                                                                                       /*
-                                                                                                          TESTE PRINCIPAIS E REGRAS DE NEGOCIO.
-                                                                                                      */
-        
-        if(estadoPistao == LOW){//PISTAO ABAIXADO / MODO PLANTIO
-          //distanciaTotal = distanciaTotal + ((test1 + test3) / 2);//calculo media distacia percorrida
-          
-          float valorPorcento = test1/100*10;          
-          if((test1 - test3 > valorPorcento)||(test3 - test1 > valorPorcento)){
-            //diferença maior q 10% de velocidade
-          } 
-          if(test1 == 0 || test3 ==0){
-            //sensores de velocidade parados         
-          }
-          if(test2 == 0 || test4 ==0){
-            //sensores de semente parados        
-          } 
-     
-                                                  
-          kmh = ((2.5/20)*contador)*3.6;          //calculo de km/h
-          if(kmh > 10.0){                         //teste de velocidade alta
-            alert(1);                                
-          }else{ 
-            alert(0);
-          }     
-        }
-        
-        if(estadoPistao == HIGH){//Pistao Erguido  - Modo Trasporte
-          if(test1 > 0 || test2 > 0 || test3 > 0 || test4 > 0){
-            //Erro movimento dos sensores com a plantadeira erguida
-          }
-          
-        }
-        
-             
-
-        
-        
-        
-        
-        
-        
+                     /*
+                      *TESTE PRINCIPAIS E REGRAS DE NEGOCIO.
+                      */
+                      
+    //PISTAO ABAIXADO / MODO PLANTIO    
+    if(estadoPistao == LOW){
+      distanciaTotal = distanciaTotal + ((test1 + test3) / 2);//calculo media distacia percorrida
+      float valorPorcento = test1/100*25;          
+      if((test1 - test3 > valorPorcento)||(test3 - test1 > valorPorcento)){
+        //diferença maior q 10% de velocidade
+        telaInicio = 14;
+      } 
+      if(test1 == 0 || test3 ==0){
+        //sensores de velocidade parados
+         telaInicio = 12;         
+      }
+      if(test2 == 0 || test4 ==0){
+        //sensores de semente parados        
+        telaInicio = 12;
+      }                                        
+      kmh = ((2.5/20)*((test1 + test3) / 2))*3.6;          //calculo de km/h
+      if(kmh > 10.0){                               //teste de velocidade alta
+        alert(1);                                
+      }else{ 
+        alert(0);
+      }     
+    }
+    
+    //Pistao Erguido  - Modo Trasporte
+    if(estadoPistao == HIGH){
+      if(test1 > 0 || test2 > 0 || test3 > 0 || test4 > 0){
+      //Erro movimento dos sensores com a plantadeira erguida
+      telaInicio = 13;
+    }
+  }
+  
+    // 2,5 metros percorridos com 20 pulsos
+    hectare = ( ( ( (2.5/20) * distanciaTotal)*(numeroLinha * espacamento/100) ) / 10000 ); 
+    alqueire = ( ( ( (2.5/20) * distanciaTotal)*(numeroLinha * espacamento/100) ) / 24200 );
+    
     telaLCD(telaInicio);
-  }                                                                           //fim loop
+  }
+  //fim loop
   
   void telaLCD(int aux){ //Metodo de escola da TELA
     lcd.clear(); 
     switch(aux){
       case 0:
         lcd.setCursor(0, 0);
-        lcd.print("Hect.  -  Alq. >"); // 20 pulsos = 2,5 metros percorridos = 10000 m2 = CM²
-        lcd.setCursor(0, 1);
-        hectare = ( ( ( (2.5/20) * distanciaTotal)*(numeroLinha * espacamento/100) ) / 10000 ); // ok aparentemente funcionando
-        lcd.print(hectare, 2);
-        alqueire = ( ( ( (2.5/20) * distanciaTotal)*(numeroLinha * espacamento/100) ) / 24200 ); // ok aparentemente funcionando
+        lcd.print("Hect.  -  Alq. >"); 
+        lcd.setCursor(0, 1);     
+        lcd.print(hectare, 2);       
         lcd.setCursor(8, 1);
         lcd.print(alqueire, 2);
         break;
@@ -305,6 +314,7 @@
         lcd.print(">"); 
         lcd.setCursor(0, 1);
         data();
+        alert(0);
         break;
       
       case 2:
@@ -323,7 +333,11 @@
         lcd.setCursor(0, 0);
         lcd.print("< Semente Metro");
         lcd.setCursor(0, 1);
-        lcd.print(distanciaTotal);     
+        lcd.print(distanciaTotal);
+        lcd.print("-"); 
+        lcd.print(test2);
+        lcd.print("-"); 
+        lcd.print(test4);
         break;
         
       case 4:
@@ -369,73 +383,50 @@
         
       case 9:
         lcd.setCursor(0, 0);
-        lcd.print("Plantando...");
+        lcd.print("    Plantando   ");
         lcd.setCursor(0, 1);
-        lcd.print("...");        
+        lcd.print("       OK       ");        
         break;
         
       case 10:
         lcd.setCursor(0, 0);
-        lcd.print("Parado...");
+        lcd.print("     Parado     ");
         lcd.setCursor(0, 1);
-        lcd.print("Plant. Erguida");        
+        lcd.print("       OK       ");        
         break;
         
       case 11:
         lcd.setCursor(0, 0);
-        lcd.print("Alerta de ");
+        lcd.print("  Falha / Erro  ");
         lcd.setCursor(0, 1);
-        lcd.print("Velocidade");        
+        lcd.print("       OK       ");
+        alert(1);        
         break;
         
       case 12:
         lcd.setCursor(0, 0);
-        lcd.print("Erro...");
+        lcd.print("     Alerta     ");
         lcd.setCursor(0, 1);
-        lcd.print("...");        
+        lcd.print("       OK       ");
+        alert(1);        
         break;
       
       case 13:
         lcd.setCursor(0, 0);
-        lcd.print("Exesso de");
+        lcd.print("   Transporte   ");
         lcd.setCursor(0, 1);
-        lcd.print("Semente");        
+        lcd.print("       OK       ");
+        alert(1);        
         break;
       
       case 14:
         lcd.setCursor(0, 0);
-        lcd.print("Diferença");
+        lcd.print("   Diferenca    ");
         lcd.setCursor(0, 1);
-        lcd.print("Lado A - B");        
+        lcd.print("  Lado A != B   ");
+        alert(1);        
         break;
       
-      case 15:
-        lcd.setCursor(0, 0);
-        lcd.print("linha1");
-        lcd.setCursor(0, 1);
-        lcd.print("linha2");        
-        break;
-        case 16:
-        lcd.setCursor(0, 0);
-        lcd.print("linha1");
-        lcd.setCursor(0, 1);
-        lcd.print("linha2");        
-        break;
-        case 17:
-        lcd.setCursor(0, 0);
-        lcd.print("linha1");
-        lcd.setCursor(0, 1);
-        lcd.print("linha2");        
-        break;
-        case 18:
-        lcd.setCursor(0, 0);
-        lcd.print("linha1");
-        lcd.setCursor(0, 1);
-        lcd.print("linha2");        
-        break;
-
-        
-   
     }
   }
   void alert(byte n){ //chamado quando algo estiver errado...saida para disposistivos
@@ -453,8 +444,7 @@
 //    }
 //    delay(1000);
   }
-  
-   
+     
   void telaApresentacao(){ // Tela de Inicio do Sistema
     do{
       lcd.setCursor(0,0);   
@@ -500,4 +490,3 @@
           RTC.adjust(DateTime(__DATE__, __TIME__));
       }
   }
-
